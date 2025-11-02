@@ -1,79 +1,24 @@
-name: Python Data Analysis
+import pandas as pd
+import numpy as np
+import seaborn as sns
+from sklearn.preprocessing import LabelEncoder
 
-on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+# Check if running in CI environment (optional)
+import os
+if os.getenv('CI'):  # GitHub Actions sets CI=true
+    import matplotlib
+    matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        python-version: [3.8, 3.9, 3.10]
+# Your main code here...
+path = "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-DA0101EN-SkillsNetwork/labs/Data%20files/automobileEDA.csv"
+df = pd.read_csv(path)
 
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pandas numpy matplotlib seaborn scikit-learn pytest
-        
-    - name: Test data analysis script
-      run: |
-        python -c "
-        import sys
-        try:
-            # Test basic imports
-            import pandas as pd
-            import numpy as np
-            import matplotlib.pyplot as plt
-            import seaborn as sns
-            from sklearn.preprocessing import LabelEncoder
-            
-            print('✓ All imports successful')
-            
-            # Test data loading
-            path = 'https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-DA0101EN-SkillsNetwork/labs/Data%20files/automobileEDA.csv'
-            df = pd.read_csv(path)
-            print('✓ Data loaded successfully')
-            print(f'Data shape: {df.shape}')
-            
-            # Test basic operations
-            numeric_df = df.select_dtypes(include=['number'])
-            print('✓ Numeric operations successful')
-            
-            print('✓ All tests passed!')
-            sys.exit(0)
-        except Exception as e:
-            print(f'✗ Error: {e}')
-            sys.exit(1)
-        "
-    
-    - name: Run with headless matplotlib
-      run: |
-        python -c "
-        import matplotlib
-        matplotlib.use('Agg')  # Use non-interactive backend
-        import pandas as pd
-        import numpy as np
-        import matplotlib.pyplot as plt
-        import seaborn as sns
-        
-        # Your actual code with headless mode
-        path = 'https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-DA0101EN-SkillsNetwork/labs/Data%20files/automobileEDA.csv'
-        df = pd.read_csv(path)
-        
-        # Run analysis without displaying plots
-        print('Data analysis completed successfully')
-        print(f'DataFrame shape: {df.shape}')
-        print(f'Columns: {list(df.columns)}')
-        "
+# ... rest of your analysis code
+
+# For plots - works in both environments
+sns.regplot(x="engine-size", y="price", data=df)
+if os.getenv('CI'):
+    plt.savefig('plot.png')
+else:
+    plt.show()
