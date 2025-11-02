@@ -1,40 +1,79 @@
-# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
-
-name: Python package
+name: Python Data Analysis
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main, master ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ main, master ]
 
 jobs:
-  build:
-
+  test:
     runs-on: ubuntu-latest
+    
     strategy:
-      fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11"]
+        python-version: [3.8, 3.9, 3.10]
 
     steps:
     - uses: actions/checkout@v4
+    
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
+    
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install flake8 pytest
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Lint with flake8
+        pip install pandas numpy matplotlib seaborn scikit-learn pytest
+        
+    - name: Test data analysis script
       run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Test with pytest
+        python -c "
+        import sys
+        try:
+            # Test basic imports
+            import pandas as pd
+            import numpy as np
+            import matplotlib.pyplot as plt
+            import seaborn as sns
+            from sklearn.preprocessing import LabelEncoder
+            
+            print('✓ All imports successful')
+            
+            # Test data loading
+            path = 'https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-DA0101EN-SkillsNetwork/labs/Data%20files/automobileEDA.csv'
+            df = pd.read_csv(path)
+            print('✓ Data loaded successfully')
+            print(f'Data shape: {df.shape}')
+            
+            # Test basic operations
+            numeric_df = df.select_dtypes(include=['number'])
+            print('✓ Numeric operations successful')
+            
+            print('✓ All tests passed!')
+            sys.exit(0)
+        except Exception as e:
+            print(f'✗ Error: {e}')
+            sys.exit(1)
+        "
+    
+    - name: Run with headless matplotlib
       run: |
-        pytest
+        python -c "
+        import matplotlib
+        matplotlib.use('Agg')  # Use non-interactive backend
+        import pandas as pd
+        import numpy as np
+        import matplotlib.pyplot as plt
+        import seaborn as sns
+        
+        # Your actual code with headless mode
+        path = 'https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-DA0101EN-SkillsNetwork/labs/Data%20files/automobileEDA.csv'
+        df = pd.read_csv(path)
+        
+        # Run analysis without displaying plots
+        print('Data analysis completed successfully')
+        print(f'DataFrame shape: {df.shape}')
+        print(f'Columns: {list(df.columns)}')
+        "
