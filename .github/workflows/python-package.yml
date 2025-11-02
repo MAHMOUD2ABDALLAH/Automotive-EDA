@@ -1,24 +1,85 @@
-import pandas as pd
-import numpy as np
-import seaborn as sns
-from sklearn.preprocessing import LabelEncoder
+# This workflow will install Python dependencies and run your data analysis script
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 
-# Check if running in CI environment (optional)
-import os
-if os.getenv('CI'):  # GitHub Actions sets CI=true
-    import matplotlib
-    matplotlib.use('Agg')
-import matplotlib.pyplot as plt
+name: Python Data Analysis
 
-# Your main code here...
-path = "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-DA0101EN-SkillsNetwork/labs/Data%20files/automobileEDA.csv"
-df = pd.read_csv(path)
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
-# ... rest of your analysis code
+permissions:
+  contents: read
 
-# For plots - works in both environments
-sns.regplot(x="engine-size", y="price", data=df)
-if os.getenv('CI'):
-    plt.savefig('plot.png')
-else:
-    plt.show()
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest pandas numpy matplotlib seaborn scikit-learn
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Run Data Analysis
+      run: |
+        python -c "
+        import matplotlib
+        matplotlib.use('Agg')
+        import pandas as pd
+        import numpy as np
+        import matplotlib.pyplot as plt
+        import seaborn as sns
+        from sklearn.preprocessing import LabelEncoder
+        
+        print('=== Starting Data Analysis ===')
+        
+        # Load and analyze data
+        path = 'https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-DA0101EN-SkillsNetwork/labs/Data%20files/automobileEDA.csv'
+        df = pd.read_csv(path)
+        print('✓ Data loaded successfully')
+        print(f'Data shape: {df.shape}')
+        
+        # Basic data info
+        print('\\\\n✓ Basic data information:')
+        print(f'Data types:\\\\n{df.dtypes}')
+        
+        # Correlation analysis
+        print('\\\\n✓ Correlation analysis:')
+        numeric_df = df.select_dtypes(include=['number'])
+        correlation = df[['engine-size', 'price']].corr().iloc[0,1]
+        print(f'Engine-size vs Price correlation: {correlation:.3f}')
+        
+        # Create plots (save instead of show)
+        print('\\\\n✓ Generating plots...')
+        sns.regplot(x='engine-size', y='price', data=df)
+        plt.title('Engine Size vs Price')
+        plt.savefig('engine_size_vs_price.png')
+        plt.close()
+        
+        sns.boxplot(x='body-style', y='price', data=df)
+        plt.title('Body Style vs Price')
+        plt.savefig('body_style_vs_price.png')
+        plt.close()
+        
+        print('✓ All plots saved successfully')
+        print('=== Data Analysis Completed ===')
+        "
+    - name: Verify Output Files
+      run: |
+        echo 'Generated files:'
+        ls -la *.png
+        echo '\\\\nData analysis completed successfully!'
