@@ -12,3 +12,5 @@ This project focuses on analyzing car data using Python to explore features and 
 4. Basics of Grouping  
 5. Correlation and Causation  
 6. ANOVA
+
+<img src="https://github.com/user-attachments/assets/43d8da7a-8c02-42f5-a367-eb83b90d078c" alt="Upwork Logo" width="50" />
