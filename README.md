@@ -12,5 +12,3 @@ This project focuses on analyzing car data using Python to explore features and 
 4. [Basics of Grouping](https://github.com/MAHMOUD2ABDALLAH/Automotive-EDA/tree/Grouping)  
 5. [Correlation and Causation](https://github.com/MAHMOUD2ABDALLAH/Automotive-EDA/tree/Correlation-and-Causation)  
 6. [ANOVA](https://github.com/MAHMOUD2ABDALLAH/Automotive-EDA/tree/ANOVA)
-
-<img src="https://github.com/user-attachments/assets/43d8da7a-8c02-42f5-a367-eb83b90d078c" alt="Upwork Logo" width="50" />
